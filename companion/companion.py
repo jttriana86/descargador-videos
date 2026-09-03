@@ -42,8 +42,10 @@ DOWNLOADS_DIR = get_downloads_dir()
 def check_ffmpeg():
     if shutil.which('ffmpeg'):
         return True
-    # Check common paths
+    # Check common paths (Windows + macOS Homebrew)
     common_paths = [
+        '/opt/homebrew/bin/ffmpeg',
+        '/usr/local/bin/ffmpeg',
         r'C:\ffmpeg\bin\ffmpeg.exe',
         r'C:\Program Files\ffmpeg\bin\ffmpeg.exe',
         os.path.join(os.path.expanduser('~'), r'AppData\Local\Microsoft\WinGet\Links\ffmpeg.exe')
@@ -340,11 +342,17 @@ class CompanionHandler(BaseHTTPRequestHandler):
 
         if path == '/open-folder':
             try:
-                os.startfile(DOWNLOADS_DIR)
+                if sys.platform == 'darwin':
+                    subprocess.Popen(['open', DOWNLOADS_DIR])
+                elif sys.platform == 'win32':
+                    os.startfile(DOWNLOADS_DIR)
+                else:
+                    subprocess.Popen(['xdg-open', DOWNLOADS_DIR])
                 self.send_json({'ok': True})
             except Exception as e:
                 try:
-                    subprocess.Popen(['explorer', DOWNLOADS_DIR])
+                    cmd = ['open' if sys.platform == 'darwin' else 'explorer', DOWNLOADS_DIR]
+                    subprocess.Popen(cmd)
                     self.send_json({'ok': True})
                 except Exception as e2:
                     self.send_json({'ok': False, 'error': str(e2)}, status=500)
@@ -427,3 +435,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

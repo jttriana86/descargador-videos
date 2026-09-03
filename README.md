@@ -2,7 +2,7 @@
 
 ¿Te gusta? Invítame un café: [☕ PayPal](https://www.paypal.com/paypalme/jttriana86?locale.x=es_XC&country.x=CO)
 
-Extensión para Chrome, Edge y Opera que detecta y descarga cualquier video que se reproduzca en tu navegador. Sin límites, sin cuentas, sin suscripciones.
+Extensión para Chrome, Edge, Brave, Opera y Arc que detecta y descarga cualquier video que se reproduzca en tu navegador. Sin límites, sin cuentas, sin suscripciones.
 
 ---
 
@@ -17,19 +17,28 @@ Extensión para Chrome, Edge y Opera que detecta y descarga cualquier video que 
 
 ---
 
-## 💻 Requisitos previos (si vas a usarlo en un computador nuevo)
+## 💻 Requisitos previos (en un computador nuevo)
 
-Para que la extensión funcione con videos protegidos, cursos y streams HLS/DASH, requiere el **Companion App** local. En cualquier PC nuevo solo necesitas:
+Para que la extensión descargue streams HLS/DASH y cursos protegidos con la mejor calidad, requiere el **Companion App** local nativo.
 
-### 1. Python (versión 3.8 o superior)
-- Descárgalo desde [python.org/downloads](https://www.python.org/downloads/).
-- ⚠️ **Importante al instalar:** Marca la casilla **`Add python.exe to PATH`** en la pantalla inicial del instalador.
+### 🪟 En Windows:
+1. **Python (versión 3.8 o superior):**
+   - Descárgalo desde [python.org/downloads](https://www.python.org/downloads/).
+   - ⚠️ **Importante al instalar:** Marca la casilla **`Add python.exe to PATH`** en la pantalla inicial del instalador.
+2. **FFmpeg:**
+   - Abre PowerShell y escribe:
+     ```powershell
+     winget install Gyan.FFmpeg
+     ```
 
-### 2. FFmpeg (para ensamblar audio y video de streams)
-En Windows, abre PowerShell y ejecuta:
-```powershell
-winget install Gyan.FFmpeg
-```
+### 🍎 En Mac (macOS):
+1. Si tienes [Homebrew](https://brew.sh), abre la Terminal y ejecuta en un solo paso:
+   ```bash
+   brew install python ffmpeg
+   ```
+2. *(Opcional)* Si no usas Homebrew:
+   - Descarga el instalador de Python desde [python.org/downloads/macos](https://www.python.org/downloads/macos/).
+   - Instala FFmpeg mediante Homebrew o descarga el binario estático desde [osxexperts.net](https://www.osxexperts.net/) / [evermeet.cx/ffmpeg/](https://evermeet.cx/ffmpeg/).
 
 ---
 
@@ -40,31 +49,50 @@ winget install Gyan.FFmpeg
    ```bash
    git clone https://github.com/jttriana86/descargador-videos.git
    ```
-2. Abre tu navegador y ve a:
-   - **Chrome:** `chrome://extensions`
+2. Abre tu navegador (Chrome, Edge, Brave, Opera, Arc) y ve a:
+   - **Chrome / Brave / Arc:** `chrome://extensions`
    - **Edge:** `edge://extensions`
    - **Opera:** `opera://extensions`
 3. Activa el interruptor **"Modo desarrollador"** (arriba a la derecha).
 4. Haz clic en **"Cargar extensión descomprimida"** (o *"Cargar desempaquetada"*).
 5. Selecciona la carpeta del proyecto.
-6. ¡Listo! El ícono aparecerá en tu barra de herramientas.
+6. ¡Listo! El ícono aparecerá en tu barra de extensiones.
 
-### Paso 2: Activar el Companion (una sola vez)
-1. Abre la carpeta `companion/` del proyecto.
-2. Haz doble clic en **`instalar.bat`** (instala `yt-dlp` automáticamente).
-3. Haz doble clic en **`iniciar-silencioso.vbs`** (inicia el servidor en segundo plano sin ventanas molestas).
-4. Abre la extensión: verás el indicador en verde **`Companion activo · v2.0.0`**.
+---
 
-> **Para detener el companion cuando quieras:** Haz doble clic en `detener.bat`.  
-> **Para iniciarlo viendo la consola (debug):** Haz doble clic en `iniciar.bat`.
+### Paso 2: Activar el Companion
+
+#### 🪟 En Windows:
+1. Abre la carpeta `companion/`.
+2. Doble clic en **`instalar.bat`** (instala `yt-dlp` automáticamente).
+3. Doble clic en **`iniciar-silencioso.vbs`** (inicia el servidor en segundo plano sin consolas).
+4. *(Para detenerlo cuando quieras: doble clic en `detener.bat`)*.
+
+#### 🍎 En Mac (macOS):
+1. Abre la **Terminal** y entra a la carpeta `companion` del proyecto:
+   ```bash
+   cd ruta/a/descargador-videos/companion
+   ```
+2. Da permisos de ejecución e instala dependencias (solo la primera vez):
+   ```bash
+   chmod +x *.sh
+   ./instalar.sh
+   ```
+3. Inicia el servidor en segundo plano:
+   ```bash
+   ./iniciar.sh
+   ```
+   *(Para detenerlo cuando quieras: `./detener.sh`)*.
+
+Al abrir el popup de la extensión verás el punto en verde: **`Companion activo · v2.0.0`**.
 
 ---
 
 ## 🎯 Cómo usar la extensión
 
 1. Abre la página donde esté el video o las sesiones que deseas bajar.
-2. **Reproduce el video** (unos pocos segundos son suficientes para que el detector lo capture).
-3. Haz clic en el ícono de la extensión en tu barra de extensiones.
+2. **Reproduce el video** (unos pocos segundos son suficientes para que el detector capture el stream).
+3. Haz clic en el ícono de la extensión en tu barra de navegación.
 4. Verás la lista de videos detectados con su **portada**, **título real** y **duración**.
 5. Puedes hacer clic en **✏️ Editar** si quieres personalizar el nombre del archivo.
 6. Haz clic en **⬇ Descargar** (o en *"Descargar todos"* si hay varias sesiones en la página).
@@ -87,13 +115,16 @@ descargador-videos/
 ├── popup.css                — Estilos modernos con modo oscuro
 ├── popup.js                 — Lógica interactiva del popup
 ├── icons/                   — Íconos de la extensión
-└── companion/               — Servidor local nativo (Python + yt-dlp + FFmpeg)
-    ├── companion.py         — Servidor HTTP local (puerto 7823)
-    ├── instalar.bat         — Script instalador de dependencias
-    ├── iniciar-silencioso.vbs — Inicio silencioso en segundo plano
-    ├── iniciar.bat          — Inicio con consola visible
-    ├── detener.bat          — Detener el servidor
-    └── README.md            — Documentación del companion
+└── companion/               — Servidor local nativo multiplataforma
+    ├── companion.py         — Servidor HTTP local (puerto 7823, Windows / Mac / Linux)
+    ├── instalar.bat         — Script instalador para Windows
+    ├── iniciar-silencioso.vbs — Inicio silencioso en segundo plano para Windows
+    ├── iniciar.bat          — Inicio visible para Windows
+    ├── detener.bat          — Detener en Windows
+    ├── instalar.sh          — Script instalador para macOS / Linux
+    ├── iniciar.sh           — Inicio en segundo plano para macOS / Linux
+    ├── detener.sh           — Detener en macOS / Linux
+    └── README.md            — Documentación técnica del companion
 ```
 
 ---
