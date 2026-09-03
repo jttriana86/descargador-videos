@@ -150,6 +150,26 @@ function esManifiesto(tipo) {
   return tipo === 'HLS' || tipo === 'DASH';
 }
 
+// Quality variants of one stream live in sibling folders named after the
+// rendition (/hls/1080p/index.m3u8, /hls/720p/index.m3u8). Strip those trailing
+// segments so all variants share one base directory and group as one video.
+const PATRON_RENDITION = /^(\d{3,4}p?|\d+(k|kbps)?|hd|sd|uhd|fhd|high|low|med|medium|main|master|auto|av\d*|h26[45]|hevc|avc1?|(rendition|track|variant|stream|level|layer)[-_]?\d*|v\d+)$/i;
+
+function dirBase(url) {
+  try {
+    const u = new URL(url);
+    const partes = u.pathname.replace(/[^/]*$/, '').split('/').filter(Boolean);
+    let quitados = 0;
+    while (partes.length && quitados < 2 && PATRON_RENDITION.test(partes[partes.length - 1])) {
+      partes.pop();
+      quitados++;
+    }
+    return u.origin + '/' + partes.join('/');
+  } catch {
+    return url;
+  }
+}
+
 function encontrarDuplicado(videos, url, tipo) {
   const clave = claveDedup(url);
   const exact = videos.find(v => claveDedup(v.url) === clave);
@@ -163,12 +183,14 @@ function encontrarDuplicado(videos, url, tipo) {
   }
 
   // Master and variant playlists live in nested folders; match in both
-  // directions so it works whichever one the player requested first.
+  // directions so it works whichever one the player requested first. Sibling
+  // quality folders (/1080p/ vs /720p/) match through their shared base dir.
   const dir = directorio(url);
+  const base = dirBase(url);
   return videos.find(v => {
     if (v.tipo !== tipo) return false;
     const dirV = directorio(v.url);
-    return dir.startsWith(dirV) || dirV.startsWith(dir);
+    return dir.startsWith(dirV) || dirV.startsWith(dir) || dirBase(v.url) === base;
   });
 }
 
@@ -297,7 +319,9 @@ async function _agregarVideo(tabId, url, { tipo, nombre, nivelNombre, plataforma
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (d) => {
     if (d.tabId < 0) return;
-    if (!PATRON_VIDEO.test(d.url) && !PATRON_SEGMENTO.test(d.url) && d.type !== 'media') return;
+    // xmlhttprequest included: players fetch extension-less manifests with an
+    // Authorization header; without capturing it the download gets a 401.
+    if (!PATRON_VIDEO.test(d.url) && !PATRON_SEGMENTO.test(d.url) && d.type !== 'media' && d.type !== 'xmlhttprequest') return;
     const capturados = {};
     for (const h of d.requestHeaders || []) {
       const n = h.name.toLowerCase();
