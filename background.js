@@ -331,6 +331,27 @@ chrome.webRequest.onHeadersReceived.addListener(
   ['responseHeaders']
 );
 
+// Catch-all for <video>/<audio> element requests (resourceType "media"): a
+// progressive file served without extension and with a generic Content-Type
+// (application/octet-stream is common) passes both filters above. If a media
+// element asked for it, it IS playable media — list it whatever it looks like.
+chrome.webRequest.onHeadersReceived.addListener(
+  (d) => {
+    if (d.type !== 'media') return;
+    if (PATRON_VIDEO.test(d.url) || PATRON_SEGMENTO.test(d.url)) return; // already handled / fragment
+    const ct = (d.responseHeaders?.find(h => h.name.toLowerCase() === 'content-type')?.value || '').toLowerCase();
+    if (TIPOS_VIDEO.some(t => ct.includes(t)) || TIPOS_SEGMENTO.some(t => ct.includes(t))) return;
+    if (ct.startsWith('audio/')) return; // background music, not the lesson
+    // Skip tiny responses (probes, moov atoms): need total size when available.
+    const range = d.responseHeaders?.find(h => h.name.toLowerCase() === 'content-range')?.value || '';
+    const total = +(range.split('/')[1] || d.responseHeaders?.find(h => h.name.toLowerCase() === 'content-length')?.value || 0);
+    if (total > 0 && total < 500 * 1024) return;
+    agregarVideo(d.tabId, d.url, { tipo: 'MP4', frameId: d.frameId }).catch(() => {});
+  },
+  { urls: ['<all_urls>'] },
+  ['responseHeaders']
+);
+
 // Platform-specific interceptors (Vimeo, Wistia, Hotmart, Spool) resolve config
 // endpoints into the real stream URL.
 chrome.webRequest.onHeadersReceived.addListener(

@@ -246,11 +246,24 @@ window.addEventListener('message', (event) => {
   if (event.data?.tipo === 'NAVI_SCAN_REQUEST') {
     escanearVideos();
   }
+  // Manifest HLS/DASH cazado por sniffer.js (MAIN world de este mismo frame):
+  // players que bajan el manifest con URL sin extensión y Content-Type genérico.
+  if (event.source === window && event.data?.tipo === 'DV_SNIFF' && event.data.url) {
+    chrome.runtime.sendMessage({
+      tipo: 'VIDEO_DOM',
+      url: event.data.url,
+      tipoStream: event.data.kind === 'DASH' ? 'DASH' : 'HLS'
+    });
+  }
 });
 
 // Escaneo inicial y observador de mutaciones
 escanearVideos();
 solicitarVideosDeIframes();
+
+// Avisar a sniffer.js (MAIN world) que ya escuchamos: reenvía lo que cazó
+// entre document_start y ahora.
+window.postMessage({ tipo: 'DV_READY' }, '*');
 
 const observador = new MutationObserver(() => {
   escanearVideos();
