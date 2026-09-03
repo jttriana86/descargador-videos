@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Descargador de Videos",
+  "version": "2.0.0",
+  "description": "Descarga los videos que se reproducen en tu navegador. Cursos, reuniones, Vimeo, Loom, Fathom, YouTube y cualquier HLS/DASH sin DRM.",
+
+  "permissions": [
+    "webRequest",
+    "downloads",
+    "storage",
+    "tabs",
+    "activeTab",
+    "cookies"
+  ],
+
+  "host_permissions": [
+    "<all_urls>",
+    "http://127.0.0.1:7823/*",
+    "http://localhost:7823/*"
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  },
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Descargador de Videos"
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}

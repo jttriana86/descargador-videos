@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Descargador de Videos</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="cabecera">
+    <img src="icons/icon48.png" alt="" class="logo">
+    <div class="cabecera-texto">
+      <h1>Descargador de Videos</h1>
+      <div id="companion-estado" class="companion comprobando">
+        <span class="punto"></span>
+        <span class="companion-texto">Buscando companion…</span>
+      </div>
+    </div>
+    <div class="cabecera-acciones">
+      <button id="btn-carpeta" class="btn-icono" title="Abrir carpeta de descargas" hidden>📂</button>
+    </div>
+  </header>
+
+  <!-- Aviso si falta el companion -->
+  <section id="aviso-companion" class="aviso" hidden>
+    <strong>Falta el companion.</strong> Es el programa local que hace la descarga real
+    (yt-dlp + FFmpeg). Sin él solo se pueden bajar archivos .mp4 sueltos.
+    <ol>
+      <li>Ve a tu Escritorio y haz doble clic en <code>Descargador de Videos (Iniciar)</code>.</li>
+      <li>O ejecuta <code>iniciar-silencioso.vbs</code> en la carpeta companion.</li>
+    </ol>
+  </section>
+
+  <!-- Sección de descargas activas e historial -->
+  <section id="descargas" class="descargas" hidden>
+    <div class="seccion-cabecera">
+      <h2>Descargas en curso y recientes</h2>
+      <button id="btn-limpiar-descargas" class="btn-texto" title="Borrar descargas terminadas o fallidas">🗑️ Limpiar historial</button>
+    </div>
+    <div id="lista-descargas"></div>
+  </section>
+
+  <!-- Panel de descarga de página completa (opcional / secundario) -->
+  <section class="pagina-box" id="caja-pagina">
+    <div class="pagina-info">
+      <span class="pagina-tag">Página actual</span>
+      <span class="pagina-titulo" id="pagina-titulo"></span>
+    </div>
+    <button id="btn-pagina" class="btn-secundario-pagina">
+      <span>⬇ Descargar URL completa de la página (yt-dlp)</span>
+    </button>
+    <p class="ayuda">Útil para YouTube, Vimeo, Loom y sitios con un solo video principal.</p>
+  </section>
+
+  <!-- Sección principal: Videos / Streams detectados en la página -->
+  <section class="detectados">
+    <div class="seccion-cabecera">
+      <div>
+        <h2 id="contador-texto">Videos detectados</h2>
+        <span class="contador-sub" id="contador-sub">Haz clic en reproducir si falta alguno</span>
+      </div>
+      <div class="acciones-lote">
+        <button id="btn-descargar-todos" class="btn-accion-lote" hidden>⬇ Descargar todos</button>
+        <button id="btn-limpiar" class="btn-texto">Limpiar lista</button>
+      </div>
+    </div>
+
+    <p id="estado-vacio" class="vacio">
+      Todavía no veo videos en esta pestaña.<br>
+      <strong>Dale play al video</strong> unos segundos y vuelve a abrir este panel.
+    </p>
+
+    <div id="videos-container"></div>
+  </section>
+
+  <footer class="pie">
+    <div class="pie-izq">
+      <button id="btn-pie-carpeta" class="btn-pie" title="Abrir carpeta de descargas">📂 Carpeta</button>
+      <button id="btn-pie-limpiar" class="btn-pie" title="Limpiar todas las descargas">🗑️ Limpiar historial</button>
+    </div>
+    <div class="pie-der">
+      <a href="https://yaweb.co" target="_blank" rel="noopener">yaweb.co</a>
+    </div>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
