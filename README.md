@@ -6,69 +6,94 @@ Extensión para Chrome, Edge y Opera que detecta y descarga cualquier video que 
 
 ---
 
-## Qué puede descargar
+## 🚀 Qué puede descargar
 
 - Videos MP4, WEBM, MOV directos
-- Streams HLS (.m3u8) — cursos de Udemy, Teachable, Hotmart, Kajabi y similares
+- Streams HLS (.m3u8) — cursos de Udemy, Teachable, Hotmart, Kajabi, conferencias y similares
 - Streams DASH (.mpd)
-- Cualquier video que el navegador pueda reproducir
-
-> YouTube no es compatible por sus restricciones técnicas y de términos de servicio.
-
----
-
-## Instalación
-
-> La extensión no está en la Chrome Web Store. Se instala en modo desarrollador en segundos.
-
-### Chrome
-1. Descarga o clona este repositorio
-2. Abre Chrome y ve a `chrome://extensions`
-3. Activa **"Modo desarrollador"** (toggle arriba a la derecha)
-4. Haz clic en **"Cargar extensión descomprimida"**
-5. Selecciona la carpeta del proyecto
-6. Listo — el ícono aparece en tu barra de extensiones
-
-### Microsoft Edge
-1. Ve a `edge://extensions`
-2. Activa **"Modo de desarrollador"**
-3. Clic en **"Cargar desempaquetada"** → selecciona la carpeta
-
-### Opera
-1. Ve a `opera://extensions`
-2. Activa **"Modo de desarrollador"**
-3. Clic en **"Cargar extensión descomprimida"** → selecciona la carpeta
+- Detección automática con miniaturas, duración y títulos reales de sesiones
+- Edición rápida de nombres de archivo antes de descargar
+- Descarga individual o en lote
 
 ---
 
-## Cómo usar
+## 💻 Requisitos previos (si vas a usarlo en un computador nuevo)
 
-1. Abre la página del video que quieres descargar
-2. **Reproduce el video** (aunque sea unos segundos)
-3. Haz clic en el ícono de la extensión en tu barra
-4. Verás los videos detectados con un botón **"Descargar"** en cada uno
-5. Haz clic en descargar — el archivo se guarda en tu carpeta de Descargas
+Para que la extensión funcione con videos protegidos, cursos y streams HLS/DASH, requiere el **Companion App** local. En cualquier PC nuevo solo necesitas:
 
-### Cola de descargas
-Si haces clic en varios videos a la vez, se agregan a una cola automática y se descargan uno por uno.
+### 1. Python (versión 3.8 o superior)
+- Descárgalo desde [python.org/downloads](https://www.python.org/downloads/).
+- ⚠️ **Importante al instalar:** Marca la casilla **`Add python.exe to PATH`** en la pantalla inicial del instalador.
 
-### Formato del archivo
-- Los videos directos (MP4, WEBM) se guardan en su formato original
-- Los streams HLS se guardan como `.mp4`
+### 2. FFmpeg (para ensamblar audio y video de streams)
+En Windows, abre PowerShell y ejecuta:
+```powershell
+winget install Gyan.FFmpeg
+```
 
 ---
 
-## Estructura del proyecto
+## 📦 Instalación paso a paso
+
+### Paso 1: Instalar la extensión en el navegador
+1. Descarga o clona este repositorio:
+   ```bash
+   git clone https://github.com/jttriana86/descargador-videos.git
+   ```
+2. Abre tu navegador y ve a:
+   - **Chrome:** `chrome://extensions`
+   - **Edge:** `edge://extensions`
+   - **Opera:** `opera://extensions`
+3. Activa el interruptor **"Modo desarrollador"** (arriba a la derecha).
+4. Haz clic en **"Cargar extensión descomprimida"** (o *"Cargar desempaquetada"*).
+5. Selecciona la carpeta del proyecto.
+6. ¡Listo! El ícono aparecerá en tu barra de herramientas.
+
+### Paso 2: Activar el Companion (una sola vez)
+1. Abre la carpeta `companion/` del proyecto.
+2. Haz doble clic en **`instalar.bat`** (instala `yt-dlp` automáticamente).
+3. Haz doble clic en **`iniciar-silencioso.vbs`** (inicia el servidor en segundo plano sin ventanas molestas).
+4. Abre la extensión: verás el indicador en verde **`Companion activo · v2.0.0`**.
+
+> **Para detener el companion cuando quieras:** Haz doble clic en `detener.bat`.  
+> **Para iniciarlo viendo la consola (debug):** Haz doble clic en `iniciar.bat`.
+
+---
+
+## 🎯 Cómo usar la extensión
+
+1. Abre la página donde esté el video o las sesiones que deseas bajar.
+2. **Reproduce el video** (unos pocos segundos son suficientes para que el detector lo capture).
+3. Haz clic en el ícono de la extensión en tu barra de extensiones.
+4. Verás la lista de videos detectados con su **portada**, **título real** y **duración**.
+5. Puedes hacer clic en **✏️ Editar** si quieres personalizar el nombre del archivo.
+6. Haz clic en **⬇ Descargar** (o en *"Descargar todos"* si hay varias sesiones en la página).
+7. Los archivos se guardan automáticamente en tu carpeta de **Descargas**.
+8. Usa **🗑️ Limpiar historial** para mantener tu lista ordenada.
+
+---
+
+## 📁 Estructura del proyecto
 
 ```
-video-downloader/
-├── manifest.json      — Configuración de la extensión (permisos, versión)
-├── background.js      — Service worker: intercepta requests de red en segundo plano
-├── content.js         — Se inyecta en cada página y detecta elementos <video>
-├── popup.html         — Interfaz del popup
-├── popup.css          — Estilos
-├── popup.js           — Lógica del popup y motor de descargas
-└── icons/             — Íconos de la extensión
+descargador-videos/
+├── manifest.json            — Configuración de la extensión (Manifest V3)
+├── background.js            — Service worker: captura headers, cookies y requests
+├── content.js               — Script de contenido: extrae títulos de tarjetas, duraciones y posters
+├── downloader-engine.js     — Motor de enlace con el companion y fallback de Chrome
+├── dash-parser.js           — Parser de manifests DASH
+├── platform-interceptors.js — Interceptores de plataformas específicas
+├── popup.html               — Interfaz visual moderna tipo tarjetas
+├── popup.css                — Estilos modernos con modo oscuro
+├── popup.js                 — Lógica interactiva del popup
+├── icons/                   — Íconos de la extensión
+└── companion/               — Servidor local nativo (Python + yt-dlp + FFmpeg)
+    ├── companion.py         — Servidor HTTP local (puerto 7823)
+    ├── instalar.bat         — Script instalador de dependencias
+    ├── iniciar-silencioso.vbs — Inicio silencioso en segundo plano
+    ├── iniciar.bat          — Inicio con consola visible
+    ├── detener.bat          — Detener el servidor
+    └── README.md            — Documentación del companion
 ```
 
 ---
